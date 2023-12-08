@@ -11,7 +11,6 @@
 void recieve_child_messages(process_content* processContent){
     recieve_messages_from_other_processes(processContent, STARTED);
     recieve_messages_from_other_processes(processContent, DONE);
-    //recieve_messages_from_other_processes(processContent, STARTED);
 }
 
 void wait_for_childs() {

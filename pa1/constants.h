@@ -8,8 +8,16 @@
 
 #include "ipc.h"
 
+typedef enum{
+    NOT_MAGIC_SIGN = 1,
+    SEND_UNSUCCESFUL,
+    MULTICAST_SEND_UNSUCCESFUL,
+    RECIEVE_UNSUCCESFUL,
 
-//static const int MAX_PROCESS_NUM = 10;
+
+}Error_statuses;
+
+
 typedef struct {
     local_id this_process;
     int write_pipes[MAX_PROCESS_NUM][MAX_PROCESS_NUM];
@@ -18,8 +26,5 @@ typedef struct {
 } process_content;
 
 
-
-//int writing_pipe[MAX_PROCESS_NUM][MAX_PROCESS_NUM];
-//int reading_pipe[MAX_PROCESS_NUM][MAX_PROCESS_NUM];
 
 #endif //LAB1_CONSTANTS_H

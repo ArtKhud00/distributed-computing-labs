@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include <unistd.h>
+#include <memory.h>
 #include "child_operations.h"
 #include "ipc.h"
 #include "pa1.h"
@@ -10,6 +11,7 @@
 
 void send_recieve_STARTED_message(process_content* processContent) {
     Message msg;
+    memset(&msg,0,sizeof(msg));
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = STARTED;
@@ -21,21 +23,20 @@ void send_recieve_STARTED_message(process_content* processContent) {
         printf("error send started message");
     }
     recieve_messages_from_other_processes(processContent, STARTED);
-    //send_recieve_DONE_message(processContent);
 }
 
 void send_recieve_DONE_message(process_content* processContent) {
     Message msg;
+    memset(&msg,0,sizeof(msg));
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = DONE;
     msg_header.s_local_time = 0;
     int len = sprintf(msg.s_payload, log_done_fmt, processContent->this_process);
     msg_header.s_payload_len = len + 1;
+    msg.s_header = msg_header;
     if(send_multicast(processContent, &msg) != 0){ // add logging
         printf("error send done message");
     }
-    //printf("Messages send to other in process %d", getpid());
     recieve_messages_from_other_processes(processContent, DONE);
-    //printf("Messages recieved in process %d", getpid());
 }

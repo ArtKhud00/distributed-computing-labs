@@ -10,7 +10,5 @@
 
 void set_pipe_descriptors(process_content* processesContent, int process_count);
 void close_extra_pipes(process_content* processContent , int process_count);
-//void close_extra_pipes(int* write, int* read, int process_count, local_id this_process);
-
 
 #endif //LAB1_PIPE_OPERATIONS_H
