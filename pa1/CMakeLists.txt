@@ -9,5 +9,6 @@ set(PIPES pipe_operations.h pipe_operations.c)
 set(PROCESS_ACTIVITY child_operations.c child_operations.h
                      parent_operations.c parent_operations.h
                      general_actions.c general_actions.h)
+set(LOGGER log.h log.c)
 
-add_executable(lab1 main.c constants.h ipc.h ipc.c pa1.h common.h ${PIPES} ${PROCESS_ACTIVITY})
+add_executable(lab1 main.c constants.h ipc.h ipc.c pa1.h common.h ${PIPES} ${PROCESS_ACTIVITY} ${LOGGER})
