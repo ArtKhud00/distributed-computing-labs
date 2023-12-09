@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
         }
     }
     close_extra_pipes(&processContent, process_count);
-    logging_process_started(processContent.this_process);  // logger
     printf("In parent section\n");
     recieve_child_messages(&processContent);
     wait_for_childs();

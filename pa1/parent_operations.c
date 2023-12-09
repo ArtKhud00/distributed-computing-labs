@@ -12,7 +12,6 @@
 void recieve_child_messages(process_content* processContent){
     recieve_messages_from_other_processes(processContent, STARTED);
     logging_received_all_started_messages(processContent->this_process);  // logger
-    logging_process_done(processContent->this_process);  // logger
     recieve_messages_from_other_processes(processContent, DONE);
     logging_received_all_done_messages(processContent->this_process);  // logger
 }
