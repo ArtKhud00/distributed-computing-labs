@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include "parent_operations.h"
 #include "general_actions.h"
 #include "log.h"
