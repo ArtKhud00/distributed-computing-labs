@@ -1,0 +1,9 @@
+# ninja log v5
+2	61	1702101337109785824	CMakeFiles/lab1.dir/general_actions.c.o	3de9696b3fc5d4a4
+1	62	1702101337109785824	CMakeFiles/lab1.dir/pipe_operations.c.o	3c5d3b2522158b23
+0	63	1702101337109785824	CMakeFiles/lab1.dir/ipc.c.o	61452d7ae7a140e3
+1	65	1702101337119785825	CMakeFiles/lab1.dir/child_operations.c.o	70736620d27e8fb7
+0	65	1702101337119785825	CMakeFiles/lab1.dir/main.c.o	49c3d231c773e2b7
+2	66	1702101337119785825	CMakeFiles/lab1.dir/log.c.o	7b4dd4e70d0a2f56
+1	67	1702101337119785825	CMakeFiles/lab1.dir/parent_operations.c.o	8ea417eb0437023a
+67	167	1702101337219785833	lab1	a3dbcc284a612021
