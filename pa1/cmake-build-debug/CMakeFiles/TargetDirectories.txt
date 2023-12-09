@@ -1,3 +1,0 @@
-/home/mrvito/MyCppRep/distributed-computing-labs/pa1/cmake-build-debug/CMakeFiles/lab1.dir
-/home/mrvito/MyCppRep/distributed-computing-labs/pa1/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/mrvito/MyCppRep/distributed-computing-labs/pa1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
