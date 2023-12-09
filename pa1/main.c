@@ -8,6 +8,7 @@
 #include "pipe_operations.h"
 #include "child_operations.h"
 #include "parent_operations.h"
+#include "log.h"
 
 process_content processContent;
 
@@ -19,6 +20,7 @@ int main(int argc, char *argv[]) {
     } else{
         return 1;
     }
+    logging_preparation();  // logger
     process_count = process_count + 1;
     set_pipe_descriptors(&processContent, process_count);
     processContent.process_num = process_count;
@@ -41,8 +43,10 @@ int main(int argc, char *argv[]) {
         }
     }
     close_extra_pipes(&processContent, process_count);
+    logging_process_started(processContent.this_process);  // logger
     printf("In parent section\n");
     recieve_child_messages(&processContent);
     wait_for_childs();
+    logging_finalize();  // logger
     return 0;
 }
