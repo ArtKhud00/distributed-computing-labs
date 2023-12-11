@@ -46,9 +46,9 @@ int main(int argc, char *argv[]) {
             close_extra_pipes(&processContent, process_count);
             save_balance_state(&processContent,processContent.process_lamport_time, processContent.process_balance);
             send_recieve_STARTED_message(&processContent);
+            process_transfer_queries(&processContent);
 
-
-            send_recieve_DONE_message(&processContent);
+            //send_recieve_DONE_message(&processContent);
             exit(0);
         }
         if(child_process > 0){

@@ -14,12 +14,12 @@
 
 void recieve_child_messages(process_content* processContent, MessageType type){
     recieve_messages_from_other_processes(processContent, type);
-    if(type == STARTED) {
-        logging_received_all_started_messages(processContent->this_process);  // logger
-    }
-    if(type == DONE) {
-        logging_received_all_done_messages(processContent->this_process);  // logger
-    }
+//    if(type == STARTED) {
+//        logging_received_all_started_messages(processContent->this_process);  // logger
+//    }
+//    if(type == DONE) {
+//        logging_received_all_done_messages(processContent->this_process);  // logger
+//    }
 }
 
 void send_stop_messages(process_content* processContent){

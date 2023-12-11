@@ -100,9 +100,43 @@ void process_transfer_queries(process_content* processContent){
             {
                 TransferOrder recieved_order;
                 memcpy(&recieved_order, msg.s_payload, msg.s_header.s_payload_len);
+                if(processContent->this_process == recieved_order.s_src) {
+                    increase_lamport_time(processContent);
+                    processContent->process_balance -= recieved_order.s_amount;
+                    save_balance_state(processContent, processContent->process_lamport_time, recieved_order.s_amount);
+                    msg.s_header.s_local_time = processContent->process_lamport_time;
+                    while(send(processContent, recieved_order.s_dst, &msg) > 0);
+                }
+                if(processContent->this_process == recieved_order.s_dst) {
+                    processContent->process_balance += recieved_order.s_amount;
+                    save_balance_state(processContent, processContent->process_lamport_time, 0);
+                    Message ack_message;
+                    MessageHeader messageHeader;
+                    messageHeader.s_magic = MESSAGE_MAGIC;
+                    messageHeader.s_type = ACK;
+                    messageHeader.s_payload_len = 0;
+                    increase_lamport_time(processContent);
+                    messageHeader.s_local_time = get_lamport_time(processContent);
+                    ack_message.s_header = messageHeader;
+                    while (send(processContent, PARENT_ID, &ack_message) > 0);
+                }
             }
             default:
                 break;
         }
+
     }
+    logging_received_all_done_messages(processContent->process_lamport_time, processContent->this_process);
+    unsigned int  message_length = processContent->balanceHistory->s_history_len * sizeof(BalanceState); // carefully check
+    Message history_message;
+    MessageHeader history_message_header;
+    history_message_header.s_magic = MESSAGE_MAGIC;
+    history_message_header.s_type = BALANCE_HISTORY;
+    increase_lamport_time(processContent);
+    history_message_header.s_local_time = processContent->process_lamport_time;
+    history_message_header.s_payload_len = message_length;
+    history_message.s_header = history_message_header;
+
+    memcpy(&history_message, processContent->balanceHistory->s_history, message_length);
+    while(send(processContent, PARENT_ID, &history_message) > 0);
 }
