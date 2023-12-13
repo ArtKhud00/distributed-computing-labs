@@ -13,7 +13,7 @@ void transfer(void *parent_data, local_id src, local_id dst, balance_t amount) {
             .s_magic = MESSAGE_MAGIC,
             .s_payload_len = sizeof(order),
             .s_type = TRANSFER,
-            .s_local_time = lamport_inc_get_time()
+            .s_local_time = increase_lamport_time_and_get_it()
     }};
     memcpy(transfer_message.s_payload, &order, sizeof(order));
     if(send(parent_data, src, &transfer_message)!=0){
@@ -21,5 +21,5 @@ void transfer(void *parent_data, local_id src, local_id dst, balance_t amount) {
     }
     Message ack_message;
     receive(parent_data, dst, &ack_message);
-    lamport_receive_time(ack_message.s_header.s_local_time);
+    get_lamport_time_from_message(ack_message.s_header.s_local_time);
 }

@@ -16,15 +16,15 @@ void send_STARTED_message(process_content* processContent) {
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = STARTED;
-    msg_header.s_local_time = lamport_inc_get_time();
-    int len = sprintf(msg.s_payload, log_started_fmt, lamport_get_time()
-                        ,processContent->this_process, getpid(), getppid(), *processContent->process_balance);
+    msg_header.s_local_time = increase_lamport_time_and_get_it();
+    int len = sprintf(msg.s_payload, log_started_fmt, get_lamport_time_value()
+                        , processContent->this_process, getpid(), getppid(), *processContent->process_balance);
     msg_header.s_payload_len = len + 1;
     msg.s_header = msg_header;
     if(send_multicast(processContent, &msg) != 0) { // add logging
         printf("error send started message");
     }
-    logging_process_started(lamport_get_time()
+    logging_process_started(get_lamport_time_value()
                             //get_lamport_time(processContent)
                             , processContent->this_process
                             , *processContent->process_balance);  // logger
@@ -60,15 +60,15 @@ void send_DONE_message(process_content* processContent) {
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = DONE;
-    msg_header.s_local_time = lamport_inc_get_time();
-    int len = sprintf(msg.s_payload, log_done_fmt, lamport_get_time(),
-                        processContent->this_process, *processContent->process_balance);
+    msg_header.s_local_time = increase_lamport_time_and_get_it();
+    int len = sprintf(msg.s_payload, log_done_fmt, get_lamport_time_value(),
+                      processContent->this_process, *processContent->process_balance);
     msg_header.s_payload_len = len + 1;
     msg.s_header = msg_header;
     if(send_multicast(processContent, &msg) != 0) { // add logging
         printf("error send done message");
     }
-    logging_process_done(lamport_get_time()
+    logging_process_done(get_lamport_time_value()
                         , processContent->this_process
                         , *processContent->process_balance);  // logger
 }
@@ -80,7 +80,7 @@ void process_transfer_queries(process_content* processContent){
     while(permission_to_work || num_DONE_process < num_C_processes){
         Message msg;
         receive_any(processContent, &msg);
-        lamport_receive_time(msg.s_header.s_local_time);
+        get_lamport_time_from_message(msg.s_header.s_local_time);
         switch (msg.s_header.s_type) {
             case STOP:
             {
@@ -99,26 +99,26 @@ void process_transfer_queries(process_content* processContent){
                 memcpy(&recieved_order, msg.s_payload, msg.s_header.s_payload_len);
                 if(processContent->this_process == recieved_order.s_src) {
                     *processContent->process_balance -= recieved_order.s_amount;
-                    save_balance_state(processContent, lamport_inc_get_time(), recieved_order.s_amount);
-                    msg.s_header.s_local_time = lamport_get_time();
+                    save_balance_state(processContent, increase_lamport_time_and_get_it(), recieved_order.s_amount);
+                    msg.s_header.s_local_time = get_lamport_time_value();
                     if(send(processContent, recieved_order.s_dst, &msg) != 0){
                         printf("TS could not send transfer from src %d to dst %d", processContent->this_process, recieved_order.s_dst);
                     }
-                    logging_transfer_out(lamport_get_time(), processContent->this_process,
+                    logging_transfer_out(get_lamport_time_value(), processContent->this_process,
                                          recieved_order.s_amount, recieved_order.s_dst);
                 }
                 if(processContent->this_process == recieved_order.s_dst) {
                     *processContent->process_balance += recieved_order.s_amount;
-                    save_balance_state(processContent, lamport_get_time(), 0);
+                    save_balance_state(processContent, get_lamport_time_value(), 0);
                     Message ack_message;
                     MessageHeader messageHeader;
                     messageHeader.s_magic = MESSAGE_MAGIC;
                     messageHeader.s_type = ACK;
                     messageHeader.s_payload_len = 0;
-                    messageHeader.s_local_time = lamport_inc_get_time();
+                    messageHeader.s_local_time = increase_lamport_time_and_get_it();
                     ack_message.s_header = messageHeader;
                     send(processContent, PARENT_ID, &ack_message);
-                    logging_transfer_in(lamport_get_time(), processContent->this_process,
+                    logging_transfer_in(get_lamport_time_value(), processContent->this_process,
                                         recieved_order.s_amount, recieved_order.s_src);
                 }
             }
@@ -127,7 +127,7 @@ void process_transfer_queries(process_content* processContent){
         }
 
     }
-    logging_received_all_done_messages(lamport_get_time(), processContent->this_process);
+    logging_received_all_done_messages(get_lamport_time_value(), processContent->this_process);
 }
 
 void send_balance_history_to_parent(process_content* processContent) {
@@ -137,7 +137,7 @@ void send_balance_history_to_parent(process_content* processContent) {
     MessageHeader msg_header;
     msg_header.s_type = BALANCE_HISTORY;
     msg_header.s_magic = MESSAGE_MAGIC;
-    msg_header.s_local_time = lamport_inc_get_time();
+    msg_header.s_local_time = increase_lamport_time_and_get_it();
     msg_header.s_payload_len = message_length;
     msg.s_header = msg_header;
     memcpy(msg.s_payload, processContent->balanceHistory->s_history, message_length);

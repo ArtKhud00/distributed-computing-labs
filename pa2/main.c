@@ -47,11 +47,11 @@ int main(int argc, char *argv[]) {
             process_balance_history.s_id = id;
             processContent.balanceHistory = &process_balance_history;
             close_extra_pipes(&processContent, process_count);
-            save_balance_state(&processContent, lamport_get_time(), 0);
+            save_balance_state(&processContent, get_lamport_time_value(), 0);
             send_STARTED_message(&processContent);
             recieve_messages_from_other_processes(&processContent, STARTED);
             process_transfer_queries(&processContent);
-            save_balance_state(&processContent, lamport_get_time(), 0);
+            save_balance_state(&processContent, get_lamport_time_value(), 0);
             send_balance_history_to_parent(&processContent);
             exit(0);
         }

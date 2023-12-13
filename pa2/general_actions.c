@@ -18,12 +18,12 @@ void recieve_messages_from_other_processes(process_content* processContent, Mess
         if(receive(processContent, process_id, &recieved_msg)!=0){
             printf("MESSAGE NOT RECIEVED!!!\n");
         }
-        lamport_receive_time(recieved_msg.s_header.s_local_time);
+        get_lamport_time_from_message(recieved_msg.s_header.s_local_time);
     }
     if(type == STARTED){
-        logging_received_all_started_messages(lamport_get_time(), processContent->this_process);
+        logging_received_all_started_messages(get_lamport_time_value(), processContent->this_process);
     }
     else if (type == DONE){
-        logging_received_all_done_messages(lamport_get_time(), processContent->this_process);
+        logging_received_all_done_messages(get_lamport_time_value(), processContent->this_process);
     }
 }

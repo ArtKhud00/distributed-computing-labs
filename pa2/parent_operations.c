@@ -22,7 +22,7 @@ void send_stop_messages(process_content* processContent){
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = STOP;
-    msg_header.s_local_time = lamport_inc_get_time();
+    msg_header.s_local_time = increase_lamport_time_and_get_it();
     msg.s_header = msg_header;
     if(send_multicast(processContent, &msg) != 0){ // add logging
         printf("error send stop message\n");
