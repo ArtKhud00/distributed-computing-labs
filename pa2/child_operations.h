@@ -8,13 +8,14 @@
 #include "constants.h"
 #include "banking.h"
 
-void send_recieve_STARTED_message(process_content*);
+void send_STARTED_message(process_content*);
 
 void save_balance_state(process_content*, timestamp_t, balance_t);
+
 void send_DONE_message(process_content*);
 
 void process_transfer_queries(process_content*);
 
-
+void send_balance_history_to_parent(process_content* processContent);
 
 #endif //LAB1_CHILD_OPERATIONS_H

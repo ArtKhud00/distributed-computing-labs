@@ -8,10 +8,10 @@
 #include "banking.h"
 #include "constants.h"
 
-timestamp_t get_lamport_time(process_content*);
+timestamp_t lamport_get_time();
 
-void lamport_time_from_message(timestamp_t, process_content*);
+timestamp_t lamport_inc_get_time();
 
-void increase_lamport_time(process_content*);
+timestamp_t lamport_receive_time(timestamp_t received_time);
 
 #endif //LAB2_LAMPORT_LOGICAL_TIME_H

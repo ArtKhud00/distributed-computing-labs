@@ -14,24 +14,18 @@
 
 void recieve_child_messages(process_content* processContent, MessageType type){
     recieve_messages_from_other_processes(processContent, type);
-//    if(type == STARTED) {
-//        logging_received_all_started_messages(processContent->this_process);  // logger
-//    }
-//    if(type == DONE) {
-//        logging_received_all_done_messages(processContent->this_process);  // logger
-//    }
 }
 
 void send_stop_messages(process_content* processContent){
-    increase_lamport_time(processContent);
     Message msg;
     memset(&msg,0, sizeof(msg));
     MessageHeader msg_header;
     msg_header.s_magic = MESSAGE_MAGIC;
     msg_header.s_type = STOP;
-    msg_header.s_local_time = get_lamport_time(processContent);
+    msg_header.s_local_time = lamport_inc_get_time();
+    msg.s_header = msg_header;
     if(send_multicast(processContent, &msg) != 0){ // add logging
-        printf("error send started message");
+        printf("error send stop message\n");
     }
     // добавить логирование об отправке stop сообщений
 }
@@ -41,11 +35,7 @@ void recieve_BalanceHistory_messages(process_content* processContent){
     all_history.s_history_len = processContent->process_num - 1;
     for(uint8_t id = 1; id < processContent->process_num; ++id){
         Message msg;
-        // check recieve method
-//        if(receive(processContent, id, &msg)){
-//            printf("Could not recieve message from process %d", id);
-//        }
-        while(receive(processContent, id, &msg)>0);
+        receive(processContent, id, &msg);
         unsigned long history_length = msg.s_header.s_payload_len / sizeof(*all_history.s_history->s_history);
         BalanceHistory balance_history;
         balance_history.s_id = id;
