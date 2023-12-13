@@ -53,7 +53,6 @@ int main(int argc, char *argv[]) {
             process_transfer_queries(&processContent);
             save_balance_state(&processContent, lamport_get_time(), 0);
             send_balance_history_to_parent(&processContent);
-            printf("AFTER send HISTORY to parent\n");
             exit(0);
         }
         if(child_process > 0){

@@ -78,15 +78,12 @@ void process_transfer_queries(process_content* processContent){
     int num_DONE_process = 0;
     int num_C_processes = processContent->process_num - 2;
     while(permission_to_work || num_DONE_process < num_C_processes){
-        printf("inside transfer cycle, process %d\n", processContent->this_process);
         Message msg;
         receive_any(processContent, &msg);
         lamport_receive_time(msg.s_header.s_local_time);
         switch (msg.s_header.s_type) {
             case STOP:
             {
-                printf("STOP header, process %d", processContent->this_process);
-                printf("inside stop section, process %d\n", processContent->this_process);
                 permission_to_work = 0;
                 send_DONE_message(processContent);
                 break;
@@ -107,6 +104,8 @@ void process_transfer_queries(process_content* processContent){
                     if(send(processContent, recieved_order.s_dst, &msg) != 0){
                         printf("TS could not send transfer from src %d to dst %d", processContent->this_process, recieved_order.s_dst);
                     }
+                    logging_transfer_out(lamport_get_time(), processContent->this_process,
+                                         recieved_order.s_amount, recieved_order.s_dst);
                 }
                 if(processContent->this_process == recieved_order.s_dst) {
                     *processContent->process_balance += recieved_order.s_amount;
@@ -119,6 +118,8 @@ void process_transfer_queries(process_content* processContent){
                     messageHeader.s_local_time = lamport_inc_get_time();
                     ack_message.s_header = messageHeader;
                     send(processContent, PARENT_ID, &ack_message);
+                    logging_transfer_in(lamport_get_time(), processContent->this_process,
+                                        recieved_order.s_amount, recieved_order.s_src);
                 }
             }
             default:
