@@ -14,6 +14,4 @@ void send_DONE_message(process_content*);
 
 void process_queries(process_content*, int);
 
-void process_queries_cs(process_content*);
-
 #endif //LAB3_CHILD_OPERATIONS_H

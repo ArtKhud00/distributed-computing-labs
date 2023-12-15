@@ -9,7 +9,6 @@
 #include "child_operations.h"
 #include "parent_operations.h"
 #include "log.h"
-#include "lamport_logical_time.h"
 #include "general_actions.h"
 
 process_content processContent;
@@ -25,7 +24,6 @@ int main(int argc, char *argv[]) {
     } else{
         return 1;
     }
-    //printf("using mutex = %d", using_mutex);
     logging_preparation();  // logger
     process_count = process_count + 1;
     set_pipe_descriptors(&processContent, process_count);
@@ -44,11 +42,9 @@ int main(int argc, char *argv[]) {
             process_queue.len = 0;
             processContent.process_queue = process_queue;
             close_extra_pipes(&processContent, process_count);
-
             send_STARTED_message(&processContent);
             recieve_messages_from_other_processes(&processContent, STARTED);
             process_queries(&processContent, using_mutex);
-
             exit(0);
         }
         if(child_process > 0){

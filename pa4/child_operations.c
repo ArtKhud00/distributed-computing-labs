@@ -10,12 +10,12 @@
 #include "pa2345.h"
 #include "log.h"
 #include "lamport_logical_time.h"
+#include "queue_operations.h"
 
 typedef struct{
     process_content * procContent;
     int* num_done_process;
 } Interaction_struct;
-
 
 void send_STARTED_message(process_content* processContent) {
     Message msg;
@@ -36,40 +36,10 @@ void send_STARTED_message(process_content* processContent) {
             , 0);  // logger
 }
 
-void add_request_to_queue(ProcessQueue *queue, Pairs time_pid) {
-    if (queue->len == 0) {
-        queue->processes[queue->len++] = time_pid;
-        return;
-    }
-    queue->len++;
-    //assert(queue->length <= MAX_PROCESS_ID);
-    for (int i = 0; i < queue->len - 1; i++) {
-        Pairs compared_pairs = queue->processes[i];
-        int request_have_smaller_time = time_pid.lamport_time < compared_pairs.lamport_time;
-        int time_is_equal_but_smaller_id = time_pid.lamport_time == compared_pairs.lamport_time && time_pid.process_id < compared_pairs.process_id;
-        if (request_have_smaller_time || time_is_equal_but_smaller_id) {
-            for (int j = queue->len - 2; j >= i; j--) {
-                queue->processes[j + 1] = queue->processes[j];
-            }
-            queue->processes[i] = time_pid;
-            return;
-        }
-    }
-    queue->processes[queue->len - 1] = time_pid;
-}
-
-void remove_first_request_from_queue(ProcessQueue *queue) {
-    for (int i = 0; i < queue->len - 1; i++) {
-        queue->processes[i] = queue->processes[i + 1];
-    }
-    queue->len = queue->len - 1;
-}
-
 void processes_interaction(process_content* processContent, Message* msg, int* proc_done_count){
     get_lamport_time_from_message(msg->s_header.s_local_time);
     switch (msg->s_header.s_type) {
         case CS_REQUEST: {
-            // add to queue
             Message reply_msg;
             MessageHeader reply_msg_header;
             reply_msg_header.s_magic = MESSAGE_MAGIC;
@@ -79,17 +49,15 @@ void processes_interaction(process_content* processContent, Message* msg, int* p
             reply_msg.s_header = reply_msg_header;
             Pairs time_and_pid;
             memcpy(&time_and_pid, msg->s_payload, msg->s_header.s_payload_len);
-            add_request_to_queue(&processContent->process_queue,time_and_pid);
+            add_element_to_queue(&processContent->process_queue, time_and_pid);
             send(processContent, time_and_pid.process_id, &reply_msg);
             break;
         }
         case CS_RELEASE: {
-            remove_first_request_from_queue(&processContent->process_queue);
-            // clear queue
+            delete_element_from_queue(&processContent->process_queue);
             break;
         }
         case DONE: {
-            //*proc_done_count++;
             *proc_done_count = *proc_done_count + 1;
             break;
         }
@@ -105,15 +73,12 @@ void send_to_other_childs(process_content* processContent, Message *msg){
     }
 }
 
-//void request_access_to_cs(process_content* processContent, int* proc_done_count){
 int request_cs(const void * self){
-    //process_content* processContent = (process_content*) self;
     Interaction_struct * interactionStruct = (Interaction_struct*) self;
     Pairs time_and_pid;
     timestamp_t lamp_time = increase_lamport_time_and_get_it();
     time_and_pid.lamport_time = lamp_time;
     time_and_pid.process_id = interactionStruct->procContent->this_process;
-
     Message request_msg;
     MessageHeader request_msg_header;
     request_msg_header.s_magic = MESSAGE_MAGIC;
@@ -122,13 +87,13 @@ int request_cs(const void * self){
     request_msg_header.s_payload_len = sizeof(time_and_pid);
     request_msg.s_header = request_msg_header;
     memcpy(request_msg.s_payload, &time_and_pid, sizeof(time_and_pid));
-    add_request_to_queue(&interactionStruct->procContent->process_queue, time_and_pid);
+    add_element_to_queue(&interactionStruct->procContent->process_queue, time_and_pid);
     send_to_other_childs(interactionStruct->procContent, &request_msg);
 
     uint8_t number_child = interactionStruct->procContent->process_num - 2;
     uint8_t replies_count = 0;
-    while(replies_count < number_child){
-        //printf("Waiting for reqs, proc %d, time %d\n", interactionStruct->procContent->this_process, get_lamport_time_value());
+    while(replies_count < number_child ||
+        interactionStruct->procContent->process_queue.processes[0].process_id != interactionStruct->procContent->this_process){
         Message msg;
         receive_any(interactionStruct->procContent, &msg);
         if(msg.s_header.s_type == CS_REPLY) {
@@ -144,7 +109,6 @@ int request_cs(const void * self){
 
 int release_cs(const void* self){
     Interaction_struct * interactionStruct = (Interaction_struct*) self;
-    // delete first element from queue
     Message release_msg;
     MessageHeader release_msg_header;
     release_msg_header.s_local_time = increase_lamport_time_and_get_it();
@@ -152,51 +116,27 @@ int release_cs(const void* self){
     release_msg_header.s_type = CS_RELEASE;
     release_msg_header.s_payload_len = 0;
     release_msg.s_header = release_msg_header;
-    remove_first_request_from_queue(&interactionStruct->procContent->process_queue);
+    delete_element_from_queue(&interactionStruct->procContent->process_queue);
     send_to_other_childs(interactionStruct->procContent, &release_msg);
     return 0;
 }
-
-//void process_queries(process_content* processContent){
-//    int num_done_messages = 0;
-//    uint8_t number_child = processContent->process_num - 2;
-//    for(int i = 1; i <= processContent->print_iterations; ++i){
-//        char loop_operation[70] = {0};
-//        sprintf(loop_operation, log_loop_operation_fmt, processContent->this_process, i, processContent->print_iterations);
-//        print(loop_operation);
-//        logging_loop_iteration(processContent->this_process, i, processContent->print_iterations);
-//    }
-//    send_DONE_message(processContent);
-//    logging_process_done(get_lamport_time_value(), processContent->this_process, 0);
-//    while(num_done_messages < number_child){
-//        Message msg;
-//        receive_any(processContent, &msg);
-//        get_lamport_time_from_message(msg.s_header.s_local_time);
-//        if(msg.s_header.s_type == DONE){
-//            ++num_done_messages;
-//        }
-//    }
-//    logging_received_all_done_messages(get_lamport_time_value(), processContent->this_process);
-//}
 
 void process_queries(process_content* processContent, int using_mutex){
     int num_done_messages = 0;
     uint8_t number_child = processContent->process_num - 2;
     for(int i = 1; i <= processContent->print_iterations; ++i){
         if(using_mutex){
-            //printf("_Before request_cs, process %d, time %d\n", processContent->this_process, get_lamport_time_value());
             Interaction_struct int_struct;
             int_struct.procContent = processContent;
             int_struct.num_done_process = &num_done_messages;
             request_cs(&int_struct);
         }
-        printf("Enter CS, process %d, time %d\n", processContent->this_process, get_lamport_time_value());
         char loop_operation[70] = {0};
-        sprintf(loop_operation, log_loop_operation_fmt, processContent->this_process, i, processContent->print_iterations);
+        sprintf(loop_operation, log_loop_operation_fmt, processContent->this_process, i,
+                processContent->print_iterations);
         print(loop_operation);
         logging_loop_iteration(processContent->this_process, i, processContent->print_iterations);
         if(using_mutex){
-            //printf("_Before release_cs, process %d, time %d\n", processContent->this_process, get_lamport_time_value());
             Interaction_struct int_struct;
             int_struct.procContent = processContent;
             int_struct.num_done_process = &num_done_messages;
@@ -209,35 +149,9 @@ void process_queries(process_content* processContent, int using_mutex){
         Message msg;
         receive_any(processContent, &msg);
         processes_interaction(processContent, &msg, &num_done_messages);
-//        get_lamport_time_from_message(msg.s_header.s_local_time);
-//        if(msg.s_header.s_type == DONE){
-//            ++num_done_messages;
-//        }
     }
     logging_received_all_done_messages(get_lamport_time_value(), processContent->this_process);
 }
-
-//void process_queries_cs(process_content* processContent){
-//    int num_done_messages = 0;
-//    uint8_t number_child = processContent->process_num - 2;
-//    int cycle_iter = 1;
-//    int request_sent = 0;
-//    int done_sent = 0;
-//    int replies_count = 0;
-//    while(cycle_iter < processContent->print_iterations || num_done_messages < number_child){
-//        if(done_sent == 0 && cycle_iter == processContent->print_iterations){
-//            send_DONE_message(processContent);
-//            logging_process_done(get_lamport_time_value(), processContent->this_process, 0);
-//            done_sent = 1;
-//            request_sent = 0;
-//        }
-//        if(request_sent == 0 && cycle_iter < processContent->print_iterations){
-//
-//            request_sent = 1;
-//        }
-//    }
-//    logging_received_all_done_messages(get_lamport_time_value(), processContent->this_process);
-//}
 
 void send_DONE_message(process_content* processContent) {
     Message msg;

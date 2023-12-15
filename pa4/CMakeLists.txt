@@ -10,9 +10,11 @@ set(PROCESS_ACTIVITY child_operations.c child_operations.h
         parent_operations.c parent_operations.h
         general_actions.c general_actions.h)
 set(LOGGER log.h log.c)
+set(LAMPORT lamport_logical_time.c lamport_logical_time.h)
+set(QUEUE queue_operations.c queue_operations.h)
 
 add_executable(lab3 main.c constants.h ipc.h ipc.c  pa2345.h common.h
-        ${PIPES} ${PROCESS_ACTIVITY} ${LOGGER} lamport_logical_time.c lamport_logical_time.h)
+               ${PIPES} ${PROCESS_ACTIVITY} ${LOGGER} ${LAMPORT} ${QUEUE})
 
 find_library(libruntime NAMES libruntime.so PATHS "${PROJECT_SOURCE_DIR}/lib64//")
 
