@@ -20,7 +20,7 @@ void wait_for_childs() {
     pid_t child_pid = 0;
     int status = 0;
     while ((child_pid = wait(&status)) > 0) {
-        printf("child process %d finished with %d.\n", child_pid, status);
+        //printf("child process %d finished with %d.\n", child_pid, status);
     }
 }
 

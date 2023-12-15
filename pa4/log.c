@@ -12,8 +12,8 @@
 
 int logging_preparation(void) {
     if (
-        (pipes_log_f = fopen(pipes_log, "w")) == NULL ||
-        (events_log_f = fopen(events_log, "w")) == NULL
+        (pipes_log_f = fopen(pipes_log, "a+")) == NULL ||
+        (events_log_f = fopen(events_log, "a+")) == NULL
     ) {
         perror("fopen() failed");
         logging_finalize();
@@ -54,5 +54,5 @@ void logging_pipes_created(local_id to, local_id from, int read_fd, int write_fd
 }
 
 void logging_loop_iteration(local_id id, int iter, int all_iter){
-    fprintf(pipes_log_f, log_loop_operation_fmt, id, iter, all_iter);
+    fprintf(events_log_f, log_loop_operation_fmt, id, iter, all_iter);
 }

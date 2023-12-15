@@ -13,17 +13,17 @@
 
 process_content processContent;
 
-int parse_extra_parameter(int argc, char *argv[]);
+int parse_mutexl_parameter(int argc, char **argv);
+int parse_process_count_parameter(int argc, char **argv);
 
 int main(int argc, char *argv[]) {
-    uint8_t process_count;
-    uint8_t using_mutex = 0;
-    if (argc >= 2 && strcmp(argv[1], "-p") == 0) {
-        process_count = (uint8_t)strtol(argv[2], NULL, 10);
-        using_mutex = (uint8_t)parse_extra_parameter(argc, argv);
-    } else{
+    uint8_t process_count = parse_process_count_parameter(argc, argv);
+    if(process_count == 0){
+        printf("Unable to parse cli parameters, try again. Example: -p X [--mutexl]\n");
         return 1;
     }
+    uint8_t using_mutex = (uint8_t) parse_mutexl_parameter(argc, argv);
+
     logging_preparation();  // logger
     process_count = process_count + 1;
     set_pipe_descriptors(&processContent, process_count);
@@ -59,11 +59,31 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int parse_extra_parameter(int argc,char *argv[]){
+int parse_mutexl_parameter(int argc,char **argv){
     for(int i=1; i < argc; ++i){
         if(strcmp(argv[i], "--mutexl") == 0){
             return 1;
         }
     }
     return 0;
+}
+
+int parse_process_count_parameter (int argc, char **argv) {
+    int flag = -1;
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-p") == 0) {
+            flag = i;
+            break;
+        }
+    }
+    if(flag == -1){
+        printf("Error: Please, provide \"-p\" flag to specify X - number of child processes.\n");
+        return 0;
+    }
+    const int process_arg_index = flag + 1;
+    if (argc <= process_arg_index) {
+        printf("Error: After \"-p\" flag specify integer X - number of child processes.\n");
+    }
+    int X = strtol(argv[process_arg_index], NULL, 10);
+    return X;
 }
