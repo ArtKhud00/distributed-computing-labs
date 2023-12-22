@@ -39,6 +39,8 @@ int blocking_payload_read(int read_fd, Message *msg) {
         if (count < 0 && errno == EAGAIN) {
             continue; // TODO sleep?
         }
+        //printf("count == %d, payload_len = %d, mess_type = %d\n", count, payload_len, msg->s_header.s_type);
+        //printf("\n", payload_len);
         return (count == payload_len) ? 0 : RECIEVE_UNSUCCESFUL;
     }
 }
@@ -78,15 +80,18 @@ int receive_any(void *self, Message *msg) {
         }
         const int read_fd = processContent->read_pipes[from][processContent->this_process];
         int status = asynchronous_header_read(read_fd, msg);
-        assert(status == 0);
+        //assert(status == 0);
         if (status == NO_DATA_RECIEVED)
             continue;
-        if (status == RECIEVE_UNSUCCESFUL)
+        if (status == RECIEVE_UNSUCCESFUL) {
+            printf("status UNSUCC\n");
             return RECIEVE_UNSUCCESFUL;
+        }
 
-
-        if (msg->s_header.s_magic != MESSAGE_MAGIC)
+        if (msg->s_header.s_magic != MESSAGE_MAGIC) {
+            printf("HEADER NOT MAGIC!!\n");
             return RECIEVE_UNSUCCESFUL;
+        }
 
         return blocking_payload_read(read_fd, msg);
     }

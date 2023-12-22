@@ -150,7 +150,7 @@ void handle_requests(process_content *content) {
 
         Message incoming_message;
         int receive_any_status = receive_any(content, &incoming_message);
-        printf("Receive message %d\n", receive_any_status);
+        //printf("Receive message %d\n", receive_any_status);
         if (receive_any_status == -1) {
             //  means no messages
             if (loop_iteration <= MAX_LOOP_COUNT && can_enter_cs(content)) {

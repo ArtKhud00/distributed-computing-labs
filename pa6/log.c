@@ -29,26 +29,26 @@ void logging_finalize(void) {
 }
 
 void logging_process_started(timestamp_t lamport_time, local_id id) {
-    printf(log_started_fmt, lamport_time, id, getpid(), getppid(), 0);
+    //printf(log_started_fmt, lamport_time, id, getpid(), getppid(), 0);
     fprintf(events_log_f, log_started_fmt, lamport_time, id, getpid(), getppid(), 0);
 }
 
 void logging_received_all_started_messages(timestamp_t lamport_time, local_id id) {
-    printf(log_received_all_started_fmt, lamport_time, id);
+    //printf(log_received_all_started_fmt, lamport_time, id);
     fprintf(events_log_f, log_received_all_started_fmt, lamport_time, id);
 }
 
 void logging_process_done(timestamp_t lamport_time, local_id id) {
-    printf(log_done_fmt, lamport_time, id, 0);
+    //printf(log_done_fmt, lamport_time, id, 0);
     fprintf(events_log_f, log_done_fmt, lamport_time, id, 0);
 }
 
 void logging_received_all_done_messages(timestamp_t lamport_time, local_id id) {
-    printf(log_received_all_done_fmt, lamport_time, id);
+    //printf(log_received_all_done_fmt, lamport_time, id);
     fprintf(events_log_f, log_received_all_done_fmt, lamport_time, id);
 }
 
 void logging_pipes_created(local_id to, local_id from, int read_fd, int write_fd) {
-    printf(log_pipes_created_fmt, to, from, read_fd, write_fd);
+    //printf(log_pipes_created_fmt, to, from, read_fd, write_fd);
     fprintf(pipes_log_f, log_pipes_created_fmt, to, from, read_fd, write_fd);
 }

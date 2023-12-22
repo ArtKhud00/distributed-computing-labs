@@ -52,10 +52,10 @@ int main(int argc, char *argv[]) {
             send_STARTED_message(&processContent);
             recieve_messages_from_other_processes(&processContent, STARTED);
             if (using_mutex) {
-                printf("Using mutex\n");
+                //printf("Using mutex\n");
                 handle_requests(&processContent);
             } else {
-                printf("Not using mutex\n");
+                //printf("Not using mutex\n");
                 handle_requests_without_cs(&processContent);
             }
 
@@ -67,8 +67,8 @@ int main(int argc, char *argv[]) {
     }
     close_extra_pipes(&processContent, process_count);
     recieve_child_messages(&processContent, STARTED);
-    send_stop_messages(&processContent);
     recieve_child_messages(&processContent, DONE);
+    send_stop_messages(&processContent);
     wait_for_childs();
     logging_finalize();  // logger
     return 0;
