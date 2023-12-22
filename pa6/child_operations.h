@@ -11,9 +11,7 @@ void send_STARTED_message(process_content*);
 
 void send_DONE_message(process_content*);
 
-void handle_requests_without_cs(process_content*);
-
-void handle_requests(process_content*);
+void handle_requests_with_and_without_cs(process_content*);
 
 int fork_can_be_requested(Fork fork);
 

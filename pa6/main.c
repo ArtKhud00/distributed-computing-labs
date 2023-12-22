@@ -51,14 +51,7 @@ int main(int argc, char *argv[]) {
             close_extra_pipes(&processContent, process_count);
             send_STARTED_message(&processContent);
             recieve_messages_from_other_processes(&processContent, STARTED);
-            if (using_mutex) {
-                //printf("Using mutex\n");
-                handle_requests(&processContent);
-            } else {
-                //printf("Not using mutex\n");
-                handle_requests_without_cs(&processContent);
-            }
-
+            handle_requests_with_and_without_cs(&processContent);
             exit(0);
         }
         if(child_process > 0){

@@ -28,7 +28,6 @@ void send_stop_messages(process_content* processContent){
     if(send_multicast(processContent, &msg) != 0){ // add logging
         printf("error send stop message\n");
     }
-    // добавить логирование об отправке stop сообщений
 }
 
 void wait_for_childs() {
