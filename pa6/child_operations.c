@@ -49,12 +49,6 @@ void send_DONE_message(process_content* processContent) {
             , processContent->this_process);  // logger
 }
 
-/** Передача маркера запроса
- * Процесс отправляет соседнему процессу маркер запроса, если данный процесс:
- * 1. Владеет маркером;
- * 2. Не владеет вилкой;
- * 3. Процесс хочет зайти в critical section.
- */
 int fork_can_be_requested(const Fork fork) {
     return fork.ownership == FORK_FREE && fork.request_token == FORK_HAVE_TOKEN;
 }
@@ -69,11 +63,6 @@ static int should_send_request(process_content *content) {
     return 0;
 }
 
-/** Переход из ожидания в critical section (CS)
- * Ожидающий процесс может войти в CS только тогда, когда он владеет всеми вилками своих соседей
- * и для любого его соседа верно, что общая вилка чистая либо у неё нет маркера запроса от соседа.
- * Когда процесс переходит в CS, все его вилки становятся грязными.
- */
 static int can_enter_cs(process_content *content) {
     for (local_id i = 1; i < content->forks_num; ++i) {
         if (i == content->this_process)
@@ -88,13 +77,6 @@ static int can_enter_cs(process_content *content) {
     return 1;
 }
 
-/** Передача вилки
- * Процесс пересылает вилку, если данный процесс:
- * 1. Имеет вместе с этой вилкой соответствующий маркер запроса;
- * 2. Вилка грязная;
- * 3. Процессу не нужно входить в critical section.
- * При передаче вилка очищается.
- */
 int fork_can_be_released(const Fork fork) {
     return fork.ownership == FORK_OWNS && fork.purity == FORK_DIRTY && fork.request_token == FORK_HAVE_TOKEN;
 }
@@ -180,7 +162,7 @@ void handle_requests_with_and_without_cs(process_content *content) {
             case STOP: {
                 stop_signal_received++;
                 assert(incoming_message.s_header.s_payload_len == 0);
-                assert(stop_signal_received == 1); // check stop signal received only once
+                assert(stop_signal_received == 1);
                 break;
             }
             case DONE: {
